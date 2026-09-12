@@ -5,7 +5,30 @@ import (
 )
 
 func CreateQueueMiddleware(queueName string, connectionSettings m.ConnSettings) (m.Middleware, error) {
-	return nil, nil
+	conn, err := rabbitConnect(&connectionSettings)
+	if err != nil {
+		return nil, err
+	}
+	ch, err := createDefaultRabbitChannel(conn)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	// realmente no necesito guardarme una referencia a la cola de rabbit
+	// con el nombre es suficiente
+	_, err = createDefaultRabbitQueue(ch, queueName)
+	if err != nil {
+		ch.Close()
+		conn.Close()
+		return nil, err
+	}
+
+	queue := Queue{
+		name:       queueName,
+		connection: conn,
+		channel:    ch,
+	}
+	return &queue, nil
 }
 
 func CreateExchangeMiddleware(exchange string, keys []string, connectionSettings m.ConnSettings) (m.Middleware, error) {
