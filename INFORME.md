@@ -1,1 +1,8 @@
-Para este trabajo no se exige redactar un informe, pero pueden documentarse decisiones de diseño en este archivo.
+
+### Observaciones
+
+las helper functions checkRabbitSendError y checkRabbitConsumError son identicas en cuanto a funcionalidad.
+
+No importa, es adrede. No siempre reutilizar es bueno.
+
+una handlea el send y otra el consume.
