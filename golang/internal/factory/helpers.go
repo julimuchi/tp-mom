@@ -66,6 +66,21 @@ func createDefaultRabbitQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, 
 
 	return &q, nil
 }
+func createAnonymousRabbitQueue(ch *amqp.Channel) (*amqp.Queue, error) {
+	q, err := ch.QueueDeclare(
+		"",    // name
+		false, // durable
+		true,  // auto-delete
+		true,  // exclusive
+		false, // no-wait
+		nil,   // args
+	)
+	if err != nil {
+		return nil, formatError(QUEUE_CREATE_ERROR)
+	}
+
+	return &q, nil
+}
 
 // Si ocurre un error interno que no puede resolverse devuelve ErrMessageMiddlewareClose.
 func checkRabbitCloseError(err error) error {

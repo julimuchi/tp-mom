@@ -32,5 +32,41 @@ func CreateQueueMiddleware(queueName string, connectionSettings m.ConnSettings) 
 }
 
 func CreateExchangeMiddleware(exchange string, keys []string, connectionSettings m.ConnSettings) (m.Middleware, error) {
-	return nil, nil
+	conn, err := rabbitConnect(&connectionSettings)
+	if err != nil {
+		return nil, err
+	}
+	ch, err := createDefaultRabbitChannel(conn)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	_, err = createAnonymousRabbitQueue(ch)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	err = ch.ExchangeDeclare(
+		exchange, // name
+		"direct", // type
+		false,    // durability
+		false,    // auto-deleted
+		false,    // internal
+		false,    // no-wait
+		nil,      // arguments
+	)
+
+	if err != nil {
+		ch.Close()
+		conn.Close()
+		return nil, err
+	}
+
+	exchangeObj := Exchange{
+		name: exchange,
+	}
+
+	return &exchangeObj, nil
 }
