@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/7574-sistemas-distribuidos/tp-mom/golang/internal/middleware"
-	m "github.com/7574-sistemas-distribuidos/tp-mom/golang/internal/middleware"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func validateConnectionSetting(c *m.ConnSettings) error {
+func validateConnectionSetting(c *middleware.ConnSettings) error {
 	if c.Hostname == "" {
 		return formatError(EMPTY_CONN_HOST_ERROR)
 	}
@@ -26,7 +25,7 @@ func buildConsummerTag(queueName string) string {
 	return fmt.Sprintf("%s-consumer-tag", queueName)
 }
 
-func rabbitConnect(c *m.ConnSettings) (*amqp.Connection, error) {
+func rabbitConnect(c *middleware.ConnSettings) (*amqp.Connection, error) {
 	if err := validateConnectionSetting(c); err != nil {
 		return nil, err
 	}

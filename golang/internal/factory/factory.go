@@ -42,8 +42,9 @@ func CreateExchangeMiddleware(exchange string, keys []string, connectionSettings
 		return nil, err
 	}
 
-	_, err = createAnonymousRabbitQueue(ch)
+	q, err := createAnonymousRabbitQueue(ch)
 	if err != nil {
+		ch.Close()
 		conn.Close()
 		return nil, err
 	}
@@ -64,8 +65,27 @@ func CreateExchangeMiddleware(exchange string, keys []string, connectionSettings
 		return nil, err
 	}
 
+	for _, k := range keys {
+		err := ch.QueueBind(
+			q.Name,   // queue name
+			k,        // routing key
+			exchange, //exchange
+			false,
+			nil,
+		)
+		if err != nil {
+			ch.Close()
+			conn.Close()
+			return nil, formatError(BIND_ERROR)
+		}
+	}
+
 	exchangeObj := Exchange{
-		name: exchange,
+		exchangeName: exchange,
+		queueName:    q.Name,
+		channel:      ch,
+		connection:   conn,
+		keys:         keys,
 	}
 
 	return &exchangeObj, nil
